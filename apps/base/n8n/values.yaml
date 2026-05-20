@@ -1,0 +1,41 @@
+replicaCount: 1
+
+image:
+  repository: n8nio/n8n
+  tag: "1.94.1"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 5678
+
+ingress:
+  enabled: true
+  className: nginx
+  host: app.local
+  tls: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+
+db:
+  host: postgres-rw
+  port: 5432
+  name: n8n
+  user: n8n
+  secretName: postgres-credentials
+
+n8n:
+  encryptionKeySecret: n8n-encryption-key
+  webhookUrl: ""

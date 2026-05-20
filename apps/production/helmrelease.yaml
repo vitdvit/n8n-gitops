@@ -1,0 +1,44 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: n8n-production
+  namespace: flux-system
+spec:
+  interval: 5m
+  targetNamespace: production
+  chart:
+    spec:
+      chart: ./apps/base/n8n
+      sourceRef:
+        kind: GitRepository
+        name: flux-system
+        namespace: flux-system
+  values:
+    replicaCount: 2
+
+    ingress:
+      enabled: true
+      className: nginx
+      host: app.local
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+    autoscaling:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 5
+      targetCPUUtilizationPercentage: 70
+
+    db:
+      host: postgres-production-rw.production.svc.cluster.local
+      secretName: postgres-production-credentials
+
+    n8n:
+      encryptionKeySecret: n8n-encryption-key
+      webhookUrl: "http://app.local"
